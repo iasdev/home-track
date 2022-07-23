@@ -1,0 +1,7 @@
+{
+  "name": "Home Track",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

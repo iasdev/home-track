@@ -1,0 +1,13 @@
+{
+	"appId": "org.iasdev",
+	"appName": "Home Track",
+	"webDir": "www",
+	"bundledWebRuntime": false,
+	"plugins": {
+		"LocalNotifications": {
+			"smallIcon": "ic_stat_icon_config_sample",
+			"iconColor": "#FFFFFF",
+			"sound": "beep.wav"
+		}
+	}
+}

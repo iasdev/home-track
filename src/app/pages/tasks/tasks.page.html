@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Tasks</ion-title>
+    <ion-icon class="ion-margin-start" slot="start" name="hammer" size="large"></ion-icon>
+    <ion-icon class="toolbar-button" slot="end" name="add-circle" size="large" [routerLink]="['task']"></ion-icon>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-note *ngIf="!tasks || tasks.length == 0" class="ion-margin-start ion-margin-top" [routerLink]="['task']">No tasks were found...</ion-note>
+    <ion-item *ngFor="let t of tasks">
+      <ion-icon *ngIf="t.fastTask" slot="start" class="toolbar-button" name="alert-circle"></ion-icon>
+      <ion-icon *ngIf="t.fastTask && isExpired(t)" slot="end" class="toolbar-button" name="timer" (click)="showScheduleDialog(t)"></ion-icon>
+      <ion-icon *ngIf="!t.fastTask" slot="start" class="toolbar-button" name="hammer"></ion-icon>
+      <ion-icon *ngIf="!t.fastTask" slot="end" class="toolbar-button" name="pencil" [routerLink]="['task', t.id]"></ion-icon>
+      <ion-icon slot="end" [name]="t.fastTask ? 'checkmark-circle' : 'trash'" (click)="showDeleteCompleteDialog(t)"></ion-icon>
+      <ion-label>{{ getTaskSummary(t) }}</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
