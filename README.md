@@ -16,7 +16,11 @@ An Android app for home task tracking
 
 # Screenshots
 ![Menu](https://github.com/iasdev/home-track/blob/master/showcase/menu.PNG?raw=true)
+
 ![Adding a task](https://github.com/iasdev/home-track/blob/master/showcase/addtask.PNG?raw=true)
+
 ![All tasks listed](https://github.com/iasdev/home-track/blob/master/showcase/tasks.PNG?raw=true)
+
 ![Pending tasks](https://github.com/iasdev/home-track/blob/master/showcase/pending.PNG?raw=true)
+
 ![Settings panel](https://github.com/iasdev/home-track/blob/master/showcase/settings.PNG?raw=true)
