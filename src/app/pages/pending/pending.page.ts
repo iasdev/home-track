@@ -31,14 +31,17 @@ export class PendingPage implements OnInit {
   }
 
   private prepareFastTaskNotificationsSorted(): PendingLocalNotificationSchema[] {
-    const notifications = this.allPendingNotifications.filter(n => n.extra.fastTask)
-    return this.prepareNotificationsAndSetDataRange(notifications)
+    const fastTaskNotifications = this.allPendingNotifications.filter(n => n.extra.fastTask)
+    const notifications = this.prepareNotificationsAndSetDataRange(fastTaskNotifications)
+    return notifications.sort((n1, n2) => n1.schedule.at.getTime() - n2.schedule.at.getTime())
   }
 
   private prepareNormalNotificationsSorted(): PendingLocalNotificationSchema[] {
     let currentYear = new Date().getFullYear()
-    const notifications = this.allPendingNotifications.filter(n => !n.extra.fastTask && new Date(n.schedule.at).getFullYear() == currentYear)
-    return this.prepareNotificationsAndSetDataRange(notifications)
+    const normalNotifications = this.allPendingNotifications
+      .filter(n => !n.extra.fastTask && new Date(n.schedule.at).getFullYear() == currentYear)
+    const notifications = this.prepareNotificationsAndSetDataRange(normalNotifications)
+    return notifications
   }
 
   private prepareNotificationsAndSetDataRange(notifications: PendingLocalNotificationSchema[]) {
@@ -71,7 +74,7 @@ export class PendingPage implements OnInit {
       let selectedDate = new Date(event.detail.value).toLocaleDateString("es-ES")
       
       let pendingMsg = this.allPendingNotifications
-        .filter(p => new Date(p.schedule.at).toLocaleDateString("es-ES") == selectedDate).map(p => p.body)
+        .filter(p => new Date(p.schedule.at).toLocaleDateString("es-ES") == selectedDate).map(p => p.title)
 
       if (pendingMsg && pendingMsg.length > 0) {
         let msg = `Next tasks: ${pendingMsg.join(", ")}`

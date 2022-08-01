@@ -75,7 +75,7 @@ export class LocalNotificationsWrapperService {
             {
               id: task.id + i,
               title: task.name,
-              body: `${task.name} - ${i}/${task.repeatTimes}`,
+              body: task.fastTask ? `${task.name} - ${i}/${task.repeatTimes}` : task.name,
               schedule: { at: at[i] },
               extra: { fastTask: task.fastTask }
               //ongoing: true,

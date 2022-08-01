@@ -18,7 +18,7 @@
   <ion-list>
     <ion-item *ngFor="let p of pendingNormalNotifications"> 
       <ion-icon slot="start" class="toolbar-button" name="hammer"></ion-icon>
-      <ion-label>{{ p.body + ": " + p.extra.nextDate }}</ion-label>
+      <ion-label>{{ p.title + ": " + p.extra.nextDate }}</ion-label>
     </ion-item>
   </ion-list>
 </ion-content>
