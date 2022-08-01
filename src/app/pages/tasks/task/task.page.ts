@@ -13,21 +13,25 @@ import { StorageWrapperService } from 'src/app/services/storage-wrapper.service'
 export class TaskPage implements OnInit {
 
   protected now = new Date().toISOString()
-  private fastTaskRepeatTimes = 10
-  private nonFastTaskRepeatTimes = 5
+  private defaultTaskRepeatTimes = 3
 
-  private everyWeeksMaxValue = 12 * 4
-  private everyMonthsMaxValue = 12
   private repeatTimesMinValue = 3
   private repeatTimesMaxValue = 20
+  private everyWeeksMinValue = 1
+  private everyWeeksMaxValue = 12 * 4
+  private everyMonthsMinValue = 1
+  private everyMonthsMaxValue = 12
+
+  private everyWeeksValidations = [Validators.required, Validators.min(this.everyWeeksMinValue), Validators.max(this.everyWeeksMaxValue)]
+  private everyMonthsValidations = [Validators.required, Validators.min(this.everyMonthsMinValue), Validators.max(this.everyMonthsMaxValue)]
 
   protected form = new FormGroup({
     id: new FormControl(),
     name: new FormControl('', Validators.required),
     startDate: new FormControl(new Date()),
-    everyWeeks: new FormControl(null, this.isFastTask() ? [] : [Validators.required, Validators.max(this.everyWeeksMaxValue)]),
-    everyMonths: new FormControl(null, this.isFastTask() ? [] : [Validators.required, Validators.max(this.everyMonthsMaxValue)]),
-    repeatTimes: new FormControl(this.getDefaultRepeatTimes(), [
+    everyWeeks: new FormControl(null, this.isFastTask() ? null : this.everyWeeksValidations),
+    everyMonths: new FormControl(null, this.isFastTask() ? null : this.everyMonthsValidations),
+    repeatTimes: new FormControl(this.defaultTaskRepeatTimes, [
       Validators.required, Validators.min(this.repeatTimesMinValue), Validators.max(this.repeatTimesMaxValue)
     ]),
     fastTask: new FormControl(false)
@@ -51,10 +55,6 @@ export class TaskPage implements OnInit {
     })
   }
 
-  getDefaultRepeatTimes() {
-    return this.isFastTask() ? this.fastTaskRepeatTimes : this.nonFastTaskRepeatTimes
-  }
-
   isFastTask() {
     return (this.task && this.task.fastTask) || this.router.url.indexOf('fast-task') != -1
   }
@@ -73,6 +73,16 @@ export class TaskPage implements OnInit {
     }
 
     return this.task ? "Edit task" : "New task"
+  }
+
+  onEveryWeeksChange() {
+    this.form.controls.everyMonths.setValidators(this.form.controls.everyWeeks.valid ? null : this.everyMonthsValidations)
+    this.form.controls.everyMonths.updateValueAndValidity()
+  }
+
+  onEveryMonthChange() {
+    this.form.controls.everyWeeks.setValidators(this.form.controls.everyMonths.valid ? null : this.everyWeeksValidations)
+    this.form.controls.everyWeeks.updateValueAndValidity()
   }
 
   onStartDateChange(event) {

@@ -29,13 +29,13 @@
       <ion-col>
         <ion-item>
           <ion-label position="floating">Every weeks</ion-label>
-          <ion-input type="number" formControlName="everyWeeks"></ion-input>
+          <ion-input type="number" formControlName="everyWeeks" (keyup)="onEveryWeeksChange()"></ion-input>
         </ion-item>
       </ion-col>
       <ion-col>
         <ion-item>
           <ion-label position="floating">Every months</ion-label>
-          <ion-input type="number" formControlName="everyMonths"></ion-input>
+          <ion-input type="number" formControlName="everyMonths" (keyup)="onEveryMonthChange()"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
@@ -74,12 +74,20 @@
           <ion-label color="danger">Every weeks required</ion-label>
         </ion-chip>
         <ion-chip
+          *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.min">
+          <ion-label color="danger">Every weeks min. value is {{everyWeeksMinValue}}</ion-label>
+        </ion-chip>
+        <ion-chip
           *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.max">
           <ion-label color="danger">Every weeks max. value is {{everyWeeksMaxValue}}</ion-label>
         </ion-chip>
         <ion-chip
           *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.required">
           <ion-label color="danger">Every months required</ion-label>
+        </ion-chip>
+        <ion-chip
+          *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.min">
+          <ion-label color="danger">Every months min. value is {{everyMonthsMinValue}}</ion-label>
         </ion-chip>
         <ion-chip
           *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.max">
