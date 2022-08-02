@@ -33,7 +33,7 @@ export class PendingPage implements OnInit {
   private prepareFastTaskNotificationsSorted(): PendingLocalNotificationSchema[] {
     const fastTaskNotifications = this.allPendingNotif.filter(n => n.extra.fastTask)
     const notifications = this.prepareNotificationsAndSetDataRange(fastTaskNotifications)
-    return notifications.sort((n1, n2) => n1.schedule.at.getTime() - n2.schedule.at.getTime())
+    return notifications.sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())
   }
 
   private prepareNormalNotificationsSorted(): PendingLocalNotificationSchema[] {

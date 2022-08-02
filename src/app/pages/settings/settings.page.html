@@ -16,10 +16,7 @@
   <ion-item button (click)="showDeleteAllDataDialog()">Delete all data
     <ion-icon class="toolbar-button" slot="start" name="trash"></ion-icon>
   </ion-item>
-  <ion-item button (click)="notify(5, false)">Notify in a few seconds
-    <ion-icon class="toolbar-button" slot="start" name="chatbox-ellipses"></ion-icon>
-  </ion-item>
-  <ion-item button (click)="notify(5, true)">Notify in a few seconds and close app
+  <ion-item routerDirection="root" [routerLink]="['admin-notifications']">Notifications
     <ion-icon class="toolbar-button" slot="start" name="chatbox-ellipses"></ion-icon>
   </ion-item>
   <ion-textarea class="ion-margin-start" [value]="tasks | json" disabled="true" rows="1000"></ion-textarea>

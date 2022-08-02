@@ -83,16 +83,6 @@ export class SettingsPage implements OnInit {
     })
   }
 
-  notify(seconds: number, exit: boolean) {
-    let now = new Date()
-    now.setSeconds(now.getSeconds() + seconds)
-    this.notif.scheduleMessageAtDate("Hello", now)
-
-    if (exit) {
-      App.exitApp()
-    }
-  }
-
   dev() {
     this.helper.showInfoToast("Nothing to see here", "skull")
   }

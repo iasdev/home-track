@@ -41,6 +41,12 @@ export class LocalNotificationsWrapperService {
     this.deleteAll(notificationsToCancel)
   }
 
+  async deleteNotificationsById(id: number) {
+    let notifications = await this.getPending()
+    let notificationsToCancel = notifications.filter(n => n.id == id)
+    this.deleteAll(notificationsToCancel)
+  }
+
   async deleteAll(notificationsToCancel?: PendingLocalNotificationSchema[]) {
     let notifications = notificationsToCancel ? notificationsToCancel : await this.getPending()
     LocalNotifications.cancel({ notifications: notifications })
