@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PendingLocalNotificationSchema } from '@capacitor/local-notifications';
 import { IonicHelperService } from 'src/app/services/ionic-helper.service';
 import { LocalNotificationsWrapperService } from 'src/app/services/local-notifications-wrapper.service';
@@ -16,6 +17,7 @@ export class TasksPage implements OnInit {
 
   constructor(
     private storage: StorageWrapperService,
+    private router: Router,
     private notif: LocalNotificationsWrapperService,
     private helper: IonicHelperService
   ) { }
@@ -82,6 +84,7 @@ export class TasksPage implements OnInit {
         let scheduled = this.notif.createFastTaskNotif(task)
         if (scheduled) {
           this.helper.showInfoToast("Notifications ready again!", "add-circle-outline")
+          this.router.navigate(['pending'])
         } else {
           this.helper.showInfoToast("Error creating notifications...")
         }
