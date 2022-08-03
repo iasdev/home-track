@@ -27,14 +27,14 @@ export class TaskPage implements OnInit {
 
   protected form = new FormGroup({
     id: new FormControl(),
-    name: new FormControl('', Validators.required),
-    startDate: new FormControl(new Date()),
+    name: new FormControl(null, Validators.required),
+    startDate: new FormControl(),
     everyWeeks: new FormControl(null, this.isFastTask() ? null : this.everyWeeksValidations),
     everyMonths: new FormControl(null, this.isFastTask() ? null : this.everyMonthsValidations),
-    repeatTimes: new FormControl(this.defaultTaskRepeatTimes, [
+    repeatTimes: new FormControl(null, [
       Validators.required, Validators.min(this.repeatTimesMinValue), Validators.max(this.repeatTimesMaxValue)
     ]),
-    fastTask: new FormControl(false)
+    fastTask: new FormControl()
   })
 
   task: any
@@ -52,6 +52,18 @@ export class TaskPage implements OnInit {
       if (params['id']) {
         this.loadTask(params['id'])
       }
+    })
+
+    this.resetFormAndSetDefaultValues()
+  }
+
+  resetFormAndSetDefaultValues() {
+    this.form.reset()
+    this.form.patchValue({
+      name: '',
+      startDate: new Date(),
+      repeatTimes: this.defaultTaskRepeatTimes,
+      fastTask: false
     })
   }
 
@@ -106,7 +118,7 @@ export class TaskPage implements OnInit {
     let scheduled = this.isFastTask() ? this.notif.createFastTaskNotif(taskData) : this.notif.createNormalTaskNotif(taskData)
     if (scheduled) {
       this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
-      this.form.reset()
+      this.resetFormAndSetDefaultValues()
       this.router.navigate(['pending'])
     } else {
       this.helper.showInfoToast("Error creating notifications...")

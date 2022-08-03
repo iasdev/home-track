@@ -76,7 +76,7 @@ export class PendingPage implements OnInit {
         .filter(p => new Date(p.schedule.at).toLocaleDateString("es-ES") == selectedDate).map(p => p.title)
 
       if (pendingMsg && pendingMsg.length > 0) {
-        let msg = `Next tasks: ${pendingMsg.join(", ")}`
+        let msg = pendingMsg.join(", ")
         this.helper.showInfoToast(msg, 'hammer', 2000 * pendingMsg.length)
       } else {
         this.helper.dismissToasts()
