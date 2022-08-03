@@ -114,16 +114,16 @@ export class TaskPage implements OnInit {
     } else {
       this.storage.createTask(taskData)
     }
-    
-    let scheduled = this.isFastTask() ? this.notif.createFastTaskNotif(taskData) : this.notif.createNormalTaskNotif(taskData)
-    if (scheduled) {
-      this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
-      this.resetFormAndSetDefaultValues()
-      this.router.navigate(['pending'])
-    } else {
-      this.helper.showInfoToast("Error creating notifications...")
-    }
-  }
 
+    this.resetFormAndSetDefaultValues()
+    let scheduled = this.isFastTask() ? this.notif.createFastTaskNotif(taskData) : this.notif.createNormalTaskNotif(taskData)
+
+    scheduled.then(() => {
+      this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
+      this.router.navigate(['pending'])
+    }).catch(() => {
+      this.helper.showInfoToast("Error creating notifications...")
+    })
+  }
 }
 

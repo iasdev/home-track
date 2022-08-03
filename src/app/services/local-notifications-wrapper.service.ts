@@ -13,6 +13,7 @@ export class LocalNotificationsWrapperService {
   private taskMinutes = 0
 
   private maxSupportedYear = 2075
+  private maxSupportedNotificationsAtOnce = 250
 
   constructor() {
     // LocalNotifications.registerActionTypes({
@@ -70,34 +71,24 @@ export class LocalNotificationsWrapperService {
     })
   }
 
-  private schedule(task, at: Date[]): boolean {
-    let result: Promise<ScheduleResult>[] = []
-
-    let now = Date.now()
-    for (let i = 0; i < at.length; i++) {
-      if (now < at[i].getTime()) {
-        let promise = LocalNotifications.schedule({
-          notifications: [
-            {
-              id: task.id + i,
-              title: task.name,
-              body: task.fastTask ? `${task.name} - ${i}/${task.repeatTimes}` : task.name,
-              schedule: { at: at[i] },
-              extra: { fastTask: task.fastTask }
-              //ongoing: true,
-              //autoCancel: false
-            },
-          ],
-        })
-    
-        result.push(promise)
+  private schedule(task, at: Date[]): Promise<ScheduleResult> {
+    const now = Date.now()
+    const notificationsToSchedule = at.filter(date => now < date.getTime()).map((date, index) => {
+      return {
+        id: task.id + (index + 1),
+        title: task.name,
+        body: task.fastTask ? `${task.name} - ${index}/${task.repeatTimes}` : task.name,
+        schedule: { at: date },
+        extra: { fastTask: task.fastTask }
+        //ongoing: true,
+        //autoCancel: false
       }
-    }
-
-    return result.length > 0
+    })
+    const notificationsToSchedulePart = notificationsToSchedule.splice(0, this.maxSupportedNotificationsAtOnce)
+    return LocalNotifications.schedule({notifications: notificationsToSchedulePart})
   }
 
-  createFastTaskNotif(task: any): boolean {
+  createFastTaskNotif(task: any): Promise<ScheduleResult> {
     let startDate = new Date(typeof task.startDate == "string" ? new Date(task.startDate).getTime() : task.startDate.getTime())
     let startDateStr = startDate.toLocaleDateString("es-ES")
     let now = new Date();
@@ -119,7 +110,7 @@ export class LocalNotificationsWrapperService {
     return this.schedule(task, at)
   }
 
-  createNormalTaskNotif(task: any): boolean {
+  createNormalTaskNotif(task: any): Promise<ScheduleResult> {
     let startDate = new Date(typeof task.startDate == "string" ? new Date(task.startDate).getTime() : task.startDate.getTime())
     let everyWeeks = task.everyWeeks && task.everyWeeks > 0 ? task.everyWeeks : 0
     let everyMonths = task.everyMonths && task.everyMonths > 0 ? task.everyMonths : 0
