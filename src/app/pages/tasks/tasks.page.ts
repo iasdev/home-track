@@ -29,8 +29,45 @@ export class TasksPage implements OnInit {
     this.tasks = this.storage.getTasks();
   }
 
-  getTaskSummary(task) {
-    return task.name + " - Repeat times: " + task.repeatTimes
+  showTaskSummary(task) {
+    const taskName = `The task '${task.name}'`
+    const repeatTimes = `will repeat ${task.repeatTimes} times`
+    const startDate = "with start date: " + new Date(task.startDate).toLocaleDateString("es-ES")
+    
+    let everyWeeks: string
+    if (task.everyWeeks && task.everyWeeks > 0) {
+      everyWeeks = `will repeat ${task.repeatTimes} times every ${task.everyWeeks} weeks`
+    }
+
+    let everyMonths: string
+    if (task.everyMonths && task.everyMonths > 0) {
+      everyMonths = `will repeat ${task.repeatTimes} times every ${task.everyMonths} months`
+    }
+
+    let everyWeeksAndMonths: string
+    if (task.everyWeeks && task.everyWeeks > 0 && task.everyMonths && task.everyMonths > 0) {
+      everyWeeksAndMonths = `will repeat ${task.repeatTimes} times every ${task.everyWeeks} weeks and ${task.everyMonths} months`
+    }
+
+    let taskIcon: string
+    let msg: string
+    if (task.fastTask) {
+      taskIcon = "alert-circle"
+      msg = `${taskName} ${startDate} ${repeatTimes}`
+    } else {
+      taskIcon = "hammer"
+      msg = `${taskName} ${startDate}`
+      
+      if (everyWeeks && everyMonths) {
+        msg += ` ${everyWeeksAndMonths}`
+      } else if (everyWeeks) {
+        msg += ` ${everyWeeks}`
+      } else if (everyMonths) {
+        msg += ` ${everyMonths}`
+      }
+    }
+
+    this.helper.showInfoToast(msg, taskIcon, 5000)
   }
 
   isExpired(task) {

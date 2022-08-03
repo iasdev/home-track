@@ -29,13 +29,13 @@
       <ion-col>
         <ion-item>
           <ion-label position="floating">Every weeks</ion-label>
-          <ion-input type="number" formControlName="everyWeeks" (keyup)="onEveryWeeksChange()"></ion-input>
+          <ion-input type="number" formControlName="everyWeeks" (ionChange)="onEveryWeeksChange()"></ion-input>
         </ion-item>
       </ion-col>
       <ion-col>
         <ion-item>
           <ion-label position="floating">Every months</ion-label>
-          <ion-input type="number" formControlName="everyMonths" (keyup)="onEveryMonthChange()"></ion-input>
+          <ion-input type="number" formControlName="everyMonths" (ionChange)="onEveryMonthChange()"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>

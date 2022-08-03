@@ -17,7 +17,7 @@
   <ion-list>
     <ion-item *ngFor="let n of notifications" button (click)="showDeleteNotificationDialog(n)"> 
       <ion-icon slot="start" class="toolbar-button" [name]="getIconByNotificationStatus(n)"></ion-icon>
-      <ion-label>{{ getNotificationSummary(n) }}</ion-label>
+      <ion-label class="ion-text-wrap">{{ getNotificationSummary(n) }}</ion-label>
     </ion-item>
   </ion-list>
 </ion-content>
