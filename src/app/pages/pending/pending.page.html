@@ -6,10 +6,11 @@
 </ion-header>
 
 <ion-content>
-  <ion-datetime [firstDayOfWeek]="1" [min]="now" presentation="date" size="cover" (ionChange)="onDateChange($event)"></ion-datetime>
-  <ion-note *ngIf="(!pendingNormalNotifications || pendingNormalNotifications.length == 0) && (!pendingFaskTaskNotifications || pendingFaskTaskNotifications.length == 0)" 
-    class="ion-margin-start">No pending tasks found...</ion-note>
+  <ion-datetime *ngIf="allPendingNotif && allPendingNotif.length > 0" 
+    [firstDayOfWeek]="1" [min]="getCalendarDate(false)" [max]="getCalendarDate(true)" presentation="date" size="cover" (ionChange)="onDateChange($event)">
+  </ion-datetime>
   <ion-list>
+    <ion-note *ngIf="!allPendingNotif || allPendingNotif.length == 0" class="ion-margin-start ion-margin-top">No pending tasks found...</ion-note>
     <ion-item *ngFor="let p of pendingFaskTaskNotifications"> 
       <ion-icon slot="start" class="toolbar-button" name="alert-circle"></ion-icon>
       <ion-label class="ion-text-wrap">{{ p.title + ": " + p.extra.dateRange }}</ion-label>

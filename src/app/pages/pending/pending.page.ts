@@ -10,10 +10,9 @@ import { LocalNotificationsWrapperService } from 'src/app/services/local-notific
 })
 export class PendingPage implements OnInit {
 
-  protected now = new Date().toISOString()
   protected pendingFaskTaskNotifications: PendingLocalNotificationSchema[] = []
   protected pendingNormalNotifications: PendingLocalNotificationSchema[] = []
-  private allPendingNotif: PendingLocalNotificationSchema[] = []
+  protected allPendingNotif: PendingLocalNotificationSchema[] = []
 
   constructor(
     private notif: LocalNotificationsWrapperService,
@@ -53,6 +52,11 @@ export class PendingPage implements OnInit {
     })
 
     return result.sort((n1, n2) => n1.extra.firstDate - n2.extra.firstDate)
+  }
+
+  getCalendarDate(max: true) {
+    const allPendingNotifTimes = this.allPendingNotif.map(n => new Date(n.schedule.at).getTime())
+    return new Date(max ? Math.max(...allPendingNotifTimes) : Math.min(...allPendingNotifTimes)).toISOString()
   }
 
   onDateChange(event) {

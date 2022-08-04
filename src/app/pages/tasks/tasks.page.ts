@@ -34,6 +34,10 @@ export class TasksPage implements OnInit {
   
   private configureOnTaskDone() {
     this.notif.onNotificationDone.subscribe((notification: LocalNotificationSchema) => {
+      if (!notification) {
+        return
+      }
+      
       this.notif.deleteNotificationsByTitle(notification.title)
 
       let task = this.storage.getTaskByName(notification.title)
