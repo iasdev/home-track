@@ -1,0 +1,10 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Tasks</ion-title>
+    <ion-icon class="ion-margin-start" slot="start" name="settings" size="large"></ion-icon>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-textarea class="ion-margin-start" [value]="tasks | json" disabled="true" rows="1000"></ion-textarea>
+</ion-content>

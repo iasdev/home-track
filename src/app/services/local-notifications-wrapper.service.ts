@@ -1,34 +1,36 @@
 import { Injectable } from '@angular/core'
-import { LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { ActionPerformed, LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { IonicHelperService } from './ionic-helper.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalNotificationsWrapperService {
 
-  private fastTaskHour = 22
-  private fastTaskMinutes = 0
+  private todayFirstTaskHour = 22
+  private todayFirstTaskMinutes = 0
 
   private taskHour = 10
   private taskMinutes = 0
 
-  private maxSupportedYear = 2075
-  private maxSupportedNotificationsAtOnce = 250
+  constructor(protected helper: IonicHelperService) {
+    LocalNotifications.registerActionTypes({
+      types: [
+        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
+      ]
+    })
 
-  constructor() {
-    // LocalNotifications.registerActionTypes({
-    //   types: [
-    //     {id: "task", "actions": [{id: "done", title: "Done!"}, {id: "notDone", title: "Not done"}]},
-    //   ]
-    // })
+    LocalNotifications.addListener("localNotificationActionPerformed", (event) => this.showOnDoneDialog(event))
+  }
 
-    // LocalNotifications.addListener("localNotificationReceived", (event) => {
-    //   alert("received: " + event.title) //
-    // })
-
-    // LocalNotifications.addListener("localNotificationActionPerformed", (event) => {
-    //   alert("performed: " + event.actionId) // [tap, done, notDone]
-    // })
+  showOnDoneDialog(action: ActionPerformed) {
+    this.helper.showDialog("Are you sure?", "Did you complete the task?").then((event) => {
+      if (event.value) {
+        if ("done" == action.actionId) {
+          alert("task done WIP")
+        }
+      }
+    })
   }
 
   async getPending(): Promise<PendingLocalNotificationSchema[]> {
@@ -53,89 +55,101 @@ export class LocalNotificationsWrapperService {
     LocalNotifications.cancel({ notifications: notifications })
   }
 
-  scheduleMessageAtDate(msg: string, atDate: Date) {
+  scheduleMessageAtDates(msg: string, atDates: Date[]) {
     let now = Date.now()
-
-    return LocalNotifications.schedule({
-      notifications: [
-        {
-          id: now,
-          title: `Title: ${msg} - ${now}`,
-          body: `Msg: ${msg}`,
-          schedule: { at: atDate },
-          extra: { test: true }
-          //ongoing: true,
-          //autoCancel: false
-        },
-      ],
+    let scheduleAt = atDates.map((atDate, index) => {
+      return {
+        id: now + (index + 1),
+        title: `Title: ${msg} - ${now}`,
+        body: `Msg: ${msg}`,
+        schedule: { at: atDate },
+        extra: { test: true },
+        actionTypeId: "task",
+        autoCancel: false
+      }
     })
+
+    return LocalNotifications.schedule({ notifications: scheduleAt })
   }
 
-  private schedule(task, at: Date[]): Promise<ScheduleResult> {
+  private schedule(task, atDates: Date[]): Promise<ScheduleResult> {
     const now = Date.now()
-    const notificationsToSchedule = at.filter(date => now < date.getTime()).map((date, index) => {
+
+    atDates = atDates.filter(date => now < date.getTime())
+    const atDatesTimes = atDates.map(date => date.getTime())
+    const minDate = new Date(Math.min(...atDatesTimes))
+    const maxDate = new Date(Math.max(...atDatesTimes))
+
+    const notificationsToSchedule = atDates.map((date, index) => {
       return {
         id: task.id + (index + 1),
         title: task.name,
         body: task.fastTask ? `${task.name} - ${index}/${task.repeatTimes}` : task.name,
         schedule: { at: date },
-        extra: { fastTask: task.fastTask }
-        //ongoing: true,
-        //autoCancel: false
+        extra: { 
+          fastTask: task.fastTask, 
+          dateRange: `${minDate.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`,
+          firstDate: minDate.getTime(),
+          lastDate: maxDate.getTime()
+        },
+        actionTypeId: "task",
+        autoCancel: false
       }
     })
-    const notificationsToSchedulePart = notificationsToSchedule.splice(0, this.maxSupportedNotificationsAtOnce)
-    return LocalNotifications.schedule({notifications: notificationsToSchedulePart})
+
+    return LocalNotifications.schedule({ notifications: notificationsToSchedule })
   }
 
-  createFastTaskNotif(task: any): Promise<ScheduleResult> {
-    let startDate = new Date(typeof task.startDate == "string" ? new Date(task.startDate).getTime() : task.startDate.getTime())
-    let startDateStr = startDate.toLocaleDateString("es-ES")
+  createTaskNotif(task: any): Promise<ScheduleResult> {
     let now = new Date();
-    let nowStr = now.toLocaleDateString("es-ES")
-    
-    let notifDate = startDate
-    if (startDateStr == nowStr) {
-      notifDate.setHours(this.fastTaskHour)
-      notifDate.setMinutes(this.fastTaskMinutes)
-    } else {
-      notifDate.setHours(this.taskHour)
-      notifDate.setMinutes(this.taskMinutes)
+    let notifDate = typeof task.startDate == "string" ? new Date(task.startDate) : new Date(task.startDate.getTime())
+
+    let atDates = []
+    if (now.toLocaleDateString("es-ES") == notifDate.toLocaleDateString("es-ES")) {
+      notifDate.setHours(this.todayFirstTaskHour)
+      notifDate.setMinutes(this.todayFirstTaskMinutes)
+      atDates.push(notifDate)
     }
 
-    let initialAt = [new Date(notifDate.getTime())]
-    let nextAt = Array(task.repeatTimes).fill(0).map(x => new Date(notifDate.setDate(notifDate.getDate() + 1)))
-    let at = [...initialAt, ...nextAt]
+    let repeatAtDates = Array(task.repeatTimes).fill(0).map(x => {
+      notifDate = new Date(notifDate.getTime())
+      notifDate.setDate(notifDate.getDate() + 1)
+      notifDate.setHours(this.taskHour)
+      notifDate.setMinutes(this.taskMinutes)
+      return notifDate
+    })
+    atDates.push(...repeatAtDates)
 
-    return this.schedule(task, at)
+    return this.schedule(task, atDates)
   }
 
-  createNormalTaskNotif(task: any): Promise<ScheduleResult> {
-    let startDate = new Date(typeof task.startDate == "string" ? new Date(task.startDate).getTime() : task.startDate.getTime())
-    let everyWeeks = task.everyWeeks && task.everyWeeks > 0 ? task.everyWeeks : 0
-    let everyMonths = task.everyMonths && task.everyMonths > 0 ? task.everyMonths : 0
+  repeatTaskNotif(task: any): Promise<ScheduleResult> {
+    if (task.fastTask) {
+      return this.createTaskNotif(task)
+    }
 
-    let notifDate = new Date(startDate.getTime())
+    let notifDate = typeof task.startDate == "string" ? new Date(task.startDate) : new Date(task.startDate.getTime())
     notifDate.setHours(this.taskHour)
     notifDate.setMinutes(this.taskMinutes)
 
-    let at = []
-    while (notifDate.getFullYear() < this.maxSupportedYear) {
-      at.push(new Date(notifDate.getTime()))
-
-      let nextAt = Array(task.repeatTimes).fill(0).map(x => new Date(notifDate.setDate(notifDate.getDate() + 1)))
-      at.push(...nextAt)
-
-      if (everyMonths > 0) {
-        notifDate.setDate(startDate.getDate())
-        notifDate.setMonth(notifDate.getMonth() + everyMonths)
-      }
-
-      if (everyWeeks > 0) {
-        notifDate.setDate(notifDate.getDate() - task.repeatTimes + (everyWeeks * 7))
-      }
+    let everyMonths = task.everyMonths && task.everyMonths > 0 ? task.everyMonths : 0
+    if (everyMonths > 0) {
+      notifDate.setMonth(notifDate.getMonth() + everyMonths)
+    }
+    
+    let everyWeeks = task.everyWeeks && task.everyWeeks > 0 ? task.everyWeeks : 0
+    if (everyWeeks > 0) {
+      notifDate.setDate(notifDate.getDate() + (everyWeeks * 7))
     }
 
-    return this.schedule(task, at)
+    let atDates = [notifDate]
+    let repeatAtDates = Array(task.repeatTimes).fill(0).map(x => {
+      notifDate = new Date(notifDate.getTime())
+      notifDate.setDate(notifDate.getDate() + 1)
+      return notifDate
+    })
+    atDates.push(...repeatAtDates)
+
+    return this.schedule(task, repeatAtDates)
   }
 }

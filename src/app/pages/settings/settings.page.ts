@@ -13,8 +13,6 @@ import { StorageWrapperService } from 'src/app/services/storage-wrapper.service'
 })
 export class SettingsPage implements OnInit {
 
-  protected tasks: any[]
-
   constructor(
     private helper: IonicHelperService,
     private storage: StorageWrapperService,
@@ -24,11 +22,11 @@ export class SettingsPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.tasks = this.storage.getTasks()
+    
   }
 
   backup() {
-    let tasksJson = JSON.stringify(this.tasks)
+    let tasksJson = JSON.stringify(this.storage.getTasks())
     let backupFileName = `${Date.now()}.json`
 
     this.fs.write(tasksJson, backupFileName).then((result) => {
@@ -51,7 +49,7 @@ export class SettingsPage implements OnInit {
       if (result && result.data) {
         let toRestoreTasks = JSON.parse(result.data)
         let restoredTasks = this.storage.restoreTasks(toRestoreTasks)
-        restoredTasks.forEach(t => t.fastTask ? this.notif.createFastTaskNotif(t) : this.notif.createNormalTaskNotif(t))
+        restoredTasks.forEach(t => this.notif.createTaskNotif(t))
         this.helper.showInfoToast(`Tasks restored: ${restoredTasks.length} (File: ${lastCreatedFile})`, "arrow-up-circle")
         this.router.navigate(['tasks'])
       }
@@ -84,7 +82,9 @@ export class SettingsPage implements OnInit {
   }
 
   dev() {
-    this.helper.showInfoToast("Nothing to see here", "skull")
+    const date = new Date()
+    const dates = Array(5).fill(0).map(x => new Date(date.setSeconds(date.getSeconds() + 5)))
+    this.notif.scheduleMessageAtDates(Math.random()*1000+"---", dates)
   }
 
 }

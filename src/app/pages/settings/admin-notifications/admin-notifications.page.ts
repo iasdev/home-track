@@ -37,7 +37,7 @@ export class AdminNotificationsPage implements OnInit {
   notify(seconds: number, exit: boolean) {
     let now = new Date()
     now.setSeconds(now.getSeconds() + seconds)
-    this.notif.scheduleMessageAtDate("Hello", now)
+    this.notif.scheduleMessageAtDates("Hello", [now])
 
     if (exit) {
       App.exitApp()

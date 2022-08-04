@@ -116,9 +116,7 @@ export class TaskPage implements OnInit {
     }
 
     this.resetFormAndSetDefaultValues()
-    let scheduled = this.isFastTask() ? this.notif.createFastTaskNotif(taskData) : this.notif.createNormalTaskNotif(taskData)
-
-    scheduled.then(() => {
+    this.notif.createTaskNotif(taskData).then(() => {
       this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
       this.router.navigate(['pending'])
     }).catch(() => {

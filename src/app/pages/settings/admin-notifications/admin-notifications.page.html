@@ -20,4 +20,5 @@
       <ion-label class="ion-text-wrap">{{ getNotificationSummary(n) }}</ion-label>
     </ion-item>
   </ion-list>
+  <ion-textarea class="ion-margin-start" [value]="notifications | json" disabled="true" rows="1000"></ion-textarea>
 </ion-content>

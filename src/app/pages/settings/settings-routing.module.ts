@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-
+import { RouterModule, Routes } from '@angular/router';
 import { SettingsPage } from './settings.page';
+
 
 const routes: Routes = [
   {
@@ -11,6 +11,10 @@ const routes: Routes = [
   {
     path: 'admin-notifications',
     loadChildren: () => import('./admin-notifications/admin-notifications.module').then( m => m.AdminNotificationsPageModule)
+  },
+  {
+    path: 'admin-tasks',
+    loadChildren: () => import('./admin-tasks/admin-tasks.module').then( m => m.AdminTasksPageModule)
   }
 ];
 

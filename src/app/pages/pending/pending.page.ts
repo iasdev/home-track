@@ -26,46 +26,33 @@ export class PendingPage implements OnInit {
 
   private async preparePendingNotifications() {
     this.allPendingNotif = await this.notif.getPending()
-    this.pendingFaskTaskNotifications = this.prepareFastTaskNotificationsSorted()
-    this.pendingNormalNotifications = this.prepareNormalNotificationsSorted()
+    this.pendingFaskTaskNotifications = this.prepareFastTaskNotifications()
+    this.pendingNormalNotifications = this.prepareNormalNotifications()
   }
 
-  private prepareFastTaskNotificationsSorted(): PendingLocalNotificationSchema[] {
+  private prepareFastTaskNotifications(): PendingLocalNotificationSchema[] {
     const fastTaskNotifications = this.allPendingNotif.filter(n => n.extra.fastTask)
-    const notifications = this.prepareNotificationsAndSetDataRange(fastTaskNotifications)
-    return notifications.sort((n1, n2) => n1.extra.dateRange.localeCompare(n2.extra.dateRange))
+    return this.filterFirstNotifications(fastTaskNotifications)
   }
 
-  private prepareNormalNotificationsSorted(): PendingLocalNotificationSchema[] {
+  private prepareNormalNotifications(): PendingLocalNotificationSchema[] {
     let currentYear = new Date().getFullYear()
     const normalNotifications = this.allPendingNotif.filter(n => !n.extra.fastTask && new Date(n.schedule.at).getFullYear() == currentYear)
-    const notifications = this.prepareNotificationsAndSetDataRange(normalNotifications)
-    return notifications.sort((n1, n2) => n1.extra.nextDate.localeCompare(n2.extra.nextDate))
+    return this.filterFirstNotifications(normalNotifications)
   }
 
-  private prepareNotificationsAndSetDataRange(notifications: PendingLocalNotificationSchema[]) {
+  private filterFirstNotifications(notifications: PendingLocalNotificationSchema[]) {
     let result: PendingLocalNotificationSchema[] = []
 
     notifications.forEach(n => {
       let found = result.find(r => r.title == n.title)
 
       if (!found) {
-        let commonNotificationsDates = notifications.filter(ftn => ftn.title == n.title)
-          .map(ftn => new Date(ftn.schedule.at).getTime())
-        let minNotificationDate = new Date(Math.min(...commonNotificationsDates)).toLocaleDateString("es-ES")
-
-        if (n.extra.fastTask) {
-          let maxNotificationDate = new Date(Math.max(...commonNotificationsDates)).toLocaleDateString("es-ES")
-          n.extra.dateRange = minNotificationDate == maxNotificationDate ? maxNotificationDate : `${minNotificationDate} - ${maxNotificationDate}`
-        } else {
-          n.extra.nextDate = minNotificationDate
-        }
-
         result.push(n)
       }
     })
 
-    return result
+    return result.sort((n1, n2) => n1.extra.firstDate - n2.extra.firstDate)
   }
 
   onDateChange(event) {
