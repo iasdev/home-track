@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core'
 import { ActionPerformed, LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { BehaviorSubject } from 'rxjs'
 import { IonicHelperService } from './ionic-helper.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalNotificationsWrapperService {
+
+  private notificationDoneBS = new BehaviorSubject(null)
+  public onNotificationDone = this.notificationDoneBS.asObservable()
 
   private todayFirstTaskHour = 22
   private todayFirstTaskMinutes = 0
@@ -16,7 +20,7 @@ export class LocalNotificationsWrapperService {
   constructor(protected helper: IonicHelperService) {
     LocalNotifications.registerActionTypes({
       types: [
-        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
+        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]}
       ]
     })
 
@@ -26,8 +30,8 @@ export class LocalNotificationsWrapperService {
   showOnDoneDialog(action: ActionPerformed) {
     this.helper.showDialog("Are you sure?", "Did you complete the task?").then((event) => {
       if (event.value) {
-        if ("done" == action.actionId) {
-          alert("task done WIP")
+        if ("done" == action.actionId || (action.notification.extra.isLastDate && "notDone" == action.actionId)) {
+          this.notificationDoneBS.next(action.notification)
         }
       }
     })
@@ -90,7 +94,8 @@ export class LocalNotificationsWrapperService {
           fastTask: task.fastTask, 
           dateRange: `${minDate.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`,
           firstDate: minDate.getTime(),
-          lastDate: maxDate.getTime()
+          lastDate: maxDate.getTime(),
+          isLastDate: maxDate == date
         },
         actionTypeId: "task",
         autoCancel: false
@@ -102,7 +107,10 @@ export class LocalNotificationsWrapperService {
 
   createTaskNotif(task: any): Promise<ScheduleResult> {
     let now = new Date();
-    let notifDate = typeof task.startDate == "string" ? new Date(task.startDate) : new Date(task.startDate.getTime())
+    let startDate = typeof task.startDate == "string" ? new Date(task.startDate) : new Date(task.startDate.getTime())
+    let notifDate = new Date(startDate.getTime())
+    notifDate.setSeconds(now.getSeconds())
+    notifDate.setMilliseconds(now.getMilliseconds())
 
     let atDates = []
     if (now.toLocaleDateString("es-ES") == notifDate.toLocaleDateString("es-ES")) {

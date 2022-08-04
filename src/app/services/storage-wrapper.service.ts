@@ -28,8 +28,12 @@ export class StorageWrapperService {
     return this.tasks.sort((t1, t2) => t2.fastTask.toString().localeCompare(t1.fastTask.toString()))
   }
 
-  getTask(id: number) {
+  getTaskById(id: number) {
     return this.tasks.find(t => t.id == id)
+  }
+
+  getTaskByName(name: string) {
+    return this.tasks.find(t => t.name == name)
   }
 
   createTask(task, id?: number) {

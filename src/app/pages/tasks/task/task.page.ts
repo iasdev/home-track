@@ -72,7 +72,7 @@ export class TaskPage implements OnInit {
   }
 
   loadTask(taskId: number) {
-    this.task = this.storage.getTask(taskId)
+    this.task = this.storage.getTaskById(taskId)
 
     if (this.task) {
       this.form.setValue(this.task)
