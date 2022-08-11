@@ -10,9 +10,7 @@ import { LocalNotificationsWrapperService } from 'src/app/services/local-notific
 })
 export class PendingPage implements OnInit {
 
-  protected pendingFaskTaskNotifications: PendingLocalNotificationSchema[] = []
-  protected pendingNormalNotifications: PendingLocalNotificationSchema[] = []
-  protected allPendingNotif: PendingLocalNotificationSchema[] = []
+  protected pendingNotifications: PendingLocalNotificationSchema[] = []
 
   constructor(
     private notif: LocalNotificationsWrapperService,
@@ -24,23 +22,11 @@ export class PendingPage implements OnInit {
   }
 
   private async preparePendingNotifications() {
-    this.allPendingNotif = await this.notif.getPending()
-    this.pendingFaskTaskNotifications = this.prepareFastTaskNotifications()
-    this.pendingNormalNotifications = this.prepareNormalNotifications()
+    let notifications = await this.notif.getPending()
+    this.pendingNotifications = this.filterFirstNotificationsAndSort(notifications)
   }
 
-  private prepareFastTaskNotifications(): PendingLocalNotificationSchema[] {
-    const fastTaskNotifications = this.allPendingNotif.filter(n => n.extra.fastTask)
-    return this.filterFirstNotifications(fastTaskNotifications)
-  }
-
-  private prepareNormalNotifications(): PendingLocalNotificationSchema[] {
-    let currentYear = new Date().getFullYear()
-    const normalNotifications = this.allPendingNotif.filter(n => !n.extra.fastTask && new Date(n.schedule.at).getFullYear() == currentYear)
-    return this.filterFirstNotifications(normalNotifications)
-  }
-
-  private filterFirstNotifications(notifications: PendingLocalNotificationSchema[]) {
+  private filterFirstNotificationsAndSort(notifications: PendingLocalNotificationSchema[]) {
     let result: PendingLocalNotificationSchema[] = []
 
     notifications.forEach(n => {
@@ -51,11 +37,16 @@ export class PendingPage implements OnInit {
       }
     })
 
-    return result.sort((n1, n2) => n1.extra.firstDate - n2.extra.firstDate)
+    result.sort((n1, n2) => n1.extra.firstDate - n2.extra.firstDate)
+
+    let fastTasks = result.filter(r => r.extra.fastTask)
+    let normalTasks = result.filter(r => !r.extra.fastTask)
+
+    return [...fastTasks, ...normalTasks]
   }
 
   getCalendarDate(max: true) {
-    const allPendingNotifTimes = this.allPendingNotif.map(n => new Date(n.schedule.at).getTime())
+    const allPendingNotifTimes = this.pendingNotifications.map(n => new Date(n.schedule.at).getTime())
     return new Date(max ? Math.max(...allPendingNotifTimes) : Math.min(...allPendingNotifTimes)).toISOString()
   }
 
@@ -63,7 +54,7 @@ export class PendingPage implements OnInit {
     if (event && event.detail && event.detail.value) {
       let selectedDate = new Date(event.detail.value).toLocaleDateString("es-ES")
       
-      let pendingMsg = this.allPendingNotif
+      let pendingMsg = this.pendingNotifications
         .filter(p => new Date(p.schedule.at).toLocaleDateString("es-ES") == selectedDate).map(p => p.title)
 
       if (pendingMsg && pendingMsg.length > 0) {

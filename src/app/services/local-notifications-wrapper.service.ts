@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ActionPerformed, LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { ActionPerformed, LocalNotifications, LocalNotificationSchema, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
 import { BehaviorSubject } from 'rxjs'
 import { IonicHelperService } from './ionic-helper.service'
 
@@ -20,21 +20,22 @@ export class LocalNotificationsWrapperService {
   constructor(protected helper: IonicHelperService) {
     LocalNotifications.registerActionTypes({
       types: [
-        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]}
+        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
+        {id: "testing", "actions": [{id: "test", title: "Test"}]}
       ]
     })
 
-    LocalNotifications.addListener("localNotificationActionPerformed", (event) => this.showOnDoneDialog(event))
+    LocalNotifications.addListener("localNotificationActionPerformed", (action) => this.showOnEventDialog(action))
   }
 
-  showOnDoneDialog(action: ActionPerformed) {
-    this.helper.showDialog("Are you sure?", "Did you complete the task?").then((event) => {
-      if (event.value) {
-        if ("done" == action.actionId || (action.notification.extra.isLastDate && "notDone" == action.actionId)) {
+  showOnEventDialog(action: ActionPerformed) {
+    if ("done" == action.actionId || action.notification.extra.isLastDate) {
+      this.helper.showDialog("Are you sure?", `Did you complete the task '${action.notification.title}'?`).then((event) => {
+        if (event.value) {
           this.notificationDoneBS.next(action.notification)
         }
-      }
-    })
+      })
+    }
   }
 
   async getPending(): Promise<PendingLocalNotificationSchema[]> {
@@ -68,7 +69,8 @@ export class LocalNotificationsWrapperService {
         body: `Msg: ${msg}`,
         schedule: { at: atDate },
         extra: { test: true },
-        actionTypeId: "task",
+        actionTypeId: "testing",
+        ongoing: true,
         autoCancel: false
       }
     })
@@ -85,6 +87,10 @@ export class LocalNotificationsWrapperService {
     const maxDate = new Date(Math.max(...atDatesTimes))
 
     const notificationsToSchedule = atDates.map((date, index) => {
+      const initDate = date.toLocaleDateString("es-ES")
+      const endDate = maxDate.toLocaleDateString("es-ES")
+      const range = initDate == endDate ? endDate : `${date.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`
+
       return {
         id: task.id + (index + 1),
         title: task.name,
@@ -92,12 +98,13 @@ export class LocalNotificationsWrapperService {
         schedule: { at: date },
         extra: { 
           fastTask: task.fastTask, 
-          dateRange: `${minDate.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`,
+          dateRange: range,
           firstDate: minDate.getTime(),
           lastDate: maxDate.getTime(),
           isLastDate: maxDate == date
         },
         actionTypeId: "task",
+        ongoing: date.getTime() == maxDate.getTime(),
         autoCancel: false
       }
     })
@@ -116,8 +123,11 @@ export class LocalNotificationsWrapperService {
     if (now.toLocaleDateString("es-ES") == notifDate.toLocaleDateString("es-ES")) {
       notifDate.setHours(this.todayFirstTaskHour)
       notifDate.setMinutes(this.todayFirstTaskMinutes)
-      atDates.push(notifDate)
+    } else {
+      notifDate.setHours(this.taskHour)
+      notifDate.setMinutes(this.taskMinutes)
     }
+    atDates.push(notifDate)
 
     let repeatAtDates = Array(task.repeatTimes).fill(0).map(x => {
       notifDate = new Date(notifDate.getTime())

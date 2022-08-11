@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { LocalNotificationSchema, PendingLocalNotificationSchema } from '@capacitor/local-notifications';
+import { PendingLocalNotificationSchema } from '@capacitor/local-notifications';
 import { IonicHelperService } from 'src/app/services/ionic-helper.service';
 import { LocalNotificationsWrapperService } from 'src/app/services/local-notifications-wrapper.service';
 import { StorageWrapperService } from 'src/app/services/storage-wrapper.service';
@@ -24,29 +24,11 @@ export class TasksPage implements OnInit {
 
   async ngOnInit() {
     this.allPendingNotifications = await this.notif.getPending()
-    this.refreshTasks();
-    this.configureOnTaskDone();
+    this.refreshTasks()
   }
 
   private refreshTasks() {
-    this.tasks = this.storage.getTasks();
-  }
-  
-  private configureOnTaskDone() {
-    this.notif.onNotificationDone.subscribe((notification: LocalNotificationSchema) => {
-      if (!notification) {
-        return
-      }
-      
-      this.notif.deleteNotificationsByTitle(notification.title)
-
-      let task = this.storage.getTaskByName(notification.title)
-      if (task.fastTask) {
-        this.storage.deleteTask(task.id)
-      } else {
-        this.notif.repeatTaskNotif(task)
-      }
-    })
+    this.tasks = this.storage.getTasks()
   }
 
   showTaskSummary(task) {
@@ -129,7 +111,7 @@ export class TasksPage implements OnInit {
         icon = "checkmark-circle"
       }
 
-      this.refreshTasks();
+      this.refreshTasks()
       this.helper.showInfoToast(title, icon)
     } else {
       this.helper.showErrorToast("Error deleting task")

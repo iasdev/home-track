@@ -40,7 +40,6 @@ export class TaskPage implements OnInit {
   task: any
 
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private storage: StorageWrapperService,
     private notif: LocalNotificationsWrapperService,
@@ -48,12 +47,6 @@ export class TaskPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.loadTask(params['id'])
-      }
-    })
-
     this.resetFormAndSetDefaultValues()
   }
 
@@ -69,14 +62,6 @@ export class TaskPage implements OnInit {
 
   isFastTask() {
     return (this.task && this.task.fastTask) || this.router.url.indexOf('fast-task') != -1
-  }
-
-  loadTask(taskId: number) {
-    this.task = this.storage.getTaskById(taskId)
-
-    if (this.task) {
-      this.form.setValue(this.task)
-    }
   }
 
   getTitle() {
@@ -108,14 +93,9 @@ export class TaskPage implements OnInit {
     let taskData = this.form.value
     taskData.fastTask = this.isFastTask()
 
-    if (this.task) {
-      this.storage.updateTask(taskData)
-      this.notif.deleteNotificationsByTitle(taskData.name)
-    } else {
-      this.storage.createTask(taskData)
-    }
-
+    this.storage.createTask(taskData)
     this.resetFormAndSetDefaultValues()
+
     this.notif.createTaskNotif(taskData).then(() => {
       this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
       this.router.navigate(['pending'])
