@@ -30,10 +30,12 @@ export class PendingPage implements OnInit {
     let result: PendingLocalNotificationSchema[] = []
 
     notifications.forEach(n => {
-      let found = result.find(r => r.title == n.title)
+      let added = result.find(r => r.title == n.title)
 
-      if (!found) {
-        result.push(n)
+      if (!added) {
+        let notifs = notifications.filter(n2 => n2.title == n.title)
+        let notif = notifs.sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())[0]
+        result.push(notif)
       }
     })
 

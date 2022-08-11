@@ -20,10 +20,8 @@ export class AdminNotificationsPage implements OnInit {
   }
 
   private async refreshNotifications() {
-    let currentYear = new Date().getFullYear()
     let pendingNotifications = await this.notif.getPending()
-    this.notifications = pendingNotifications.filter(n => new Date(n.schedule.at).getFullYear() == currentYear)
-      .sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())
+    this.notifications = pendingNotifications.sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())
   }
 
   getIconByNotificationStatus(n: PendingLocalNotificationSchema) {

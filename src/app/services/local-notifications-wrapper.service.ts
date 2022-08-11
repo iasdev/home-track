@@ -79,32 +79,35 @@ export class LocalNotificationsWrapperService {
   }
 
   private schedule(task, atDates: Date[]): Promise<ScheduleResult> {
-    const now = Date.now()
+    const now = new Date()
 
-    atDates = atDates.filter(date => now < date.getTime())
+    atDates = atDates.filter(date => now.getTime() < date.getTime())
     const atDatesTimes = atDates.map(date => date.getTime())
     const minDate = new Date(Math.min(...atDatesTimes))
     const maxDate = new Date(Math.max(...atDatesTimes))
 
     const notificationsToSchedule = atDates.map((date, index) => {
+      const idStr = `${now.getFullYear()}${now.getMonth()+1}${now.getDate()}${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`
+      const id = parseInt(idStr)
       const initDate = date.toLocaleDateString("es-ES")
       const endDate = maxDate.toLocaleDateString("es-ES")
       const range = initDate == endDate ? endDate : `${date.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`
+      const isLastNotification = date.toLocaleDateString("es-ES") == maxDate.toLocaleDateString("es-ES")
 
       return {
-        id: task.id + (index + 1),
+        id: id + (index + 1),
         title: task.name,
-        body: task.fastTask ? `${task.name} - ${index}/${task.repeatTimes}` : task.name,
+        body: `${task.name} - ${index}/${task.repeatTimes}`,
         schedule: { at: date },
         extra: { 
           fastTask: task.fastTask, 
           dateRange: range,
           firstDate: minDate.getTime(),
           lastDate: maxDate.getTime(),
-          isLastDate: maxDate == date
+          isLastDate: isLastNotification
         },
         actionTypeId: "task",
-        ongoing: date.getTime() == maxDate.getTime(),
+        ongoing: isLastNotification,
         autoCancel: false
       }
     })
