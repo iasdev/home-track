@@ -87,8 +87,7 @@ export class LocalNotificationsWrapperService {
     const maxDate = new Date(Math.max(...atDatesTimes))
 
     const notificationsToSchedule = atDates.map((date, index) => {
-      const idStr = `${now.getFullYear()}${now.getMonth()+1}${now.getDate()}${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`
-      const id = parseInt(idStr)
+      const id = parseInt(`${now.getDate()}${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`)
       const initDate = date.toLocaleDateString("es-ES")
       const endDate = maxDate.toLocaleDateString("es-ES")
       const range = initDate == endDate ? endDate : `${date.toLocaleDateString("es-ES")} - ${maxDate.toLocaleDateString("es-ES")}`
