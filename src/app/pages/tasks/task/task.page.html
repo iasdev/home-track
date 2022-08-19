@@ -1,15 +1,20 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>{{getTitle()}}</ion-title>
-    <ion-icon *ngIf="!isFastTask()" class="ion-margin-start" slot="start" name="hammer" size="large"></ion-icon>
-    <ion-icon *ngIf="isFastTask()" class="ion-margin-start" slot="start" name="alert-circle" size="large"></ion-icon>
+    <ion-icon *ngIf="!currentURL('fast-task')" class="ion-margin-start" slot="start" name="hammer" size="large">
+    </ion-icon>
+    <ion-icon *ngIf="currentURL('fast-task')" class="ion-margin-start" slot="start" name="alert-circle" size="large">
+    </ion-icon>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <form [formGroup]="form" (ngSubmit)="save()">
-    <ion-item>
+    <ion-item *ngIf="!currentURL('reminder')">
       <ion-datetime [firstDayOfWeek]="1" [min]="now" presentation="date" size="cover" (ionChange)="onStartDateChange($event)"></ion-datetime>
+    </ion-item>
+    <ion-item *ngIf="currentURL('reminder')">
+      <ion-datetime presentation="time" size="cover" (ionChange)="onStartDateChange($event)"></ion-datetime>
     </ion-item>
     <ion-row>
       <ion-col>
@@ -18,14 +23,14 @@
           <ion-input formControlName="name" type="text"></ion-input>
         </ion-item>
       </ion-col>
-      <ion-col>
+      <ion-col *ngIf="!currentURL('reminder')">
         <ion-item>
           <ion-label position="floating">Repeat times</ion-label>
           <ion-input type="number" formControlName="repeatTimes"></ion-input>
         </ion-item>
       </ion-col>
     </ion-row>
-    <ion-row *ngIf="!isFastTask()">
+    <ion-row *ngIf="!currentURL('fast-task') && !currentURL('reminder')">
       <ion-col>
         <ion-item>
           <ion-label position="floating">Every weeks</ion-label>
@@ -68,32 +73,30 @@
         *ngIf="(form.controls['repeatTimes'].dirty || form.controls['repeatTimes'].touched) && form.controls['repeatTimes'].errors?.max">
         <ion-label color="danger">Repeat times max. value is {{repeatTimesMaxValue}}</ion-label>
       </ion-chip>
-      <div *ngIf="!isFastTask()">
-        <ion-chip
-          *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.required">
-          <ion-label color="danger">Every weeks required</ion-label>
-        </ion-chip>
-        <ion-chip
-          *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.min">
-          <ion-label color="danger">Every weeks min. value is {{everyWeeksMinValue}}</ion-label>
-        </ion-chip>
-        <ion-chip
-          *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.max">
-          <ion-label color="danger">Every weeks max. value is {{everyWeeksMaxValue}}</ion-label>
-        </ion-chip>
-        <ion-chip
-          *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.required">
-          <ion-label color="danger">Every months required</ion-label>
-        </ion-chip>
-        <ion-chip
-          *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.min">
-          <ion-label color="danger">Every months min. value is {{everyMonthsMinValue}}</ion-label>
-        </ion-chip>
-        <ion-chip
-          *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.max">
-          <ion-label color="danger">Every months max. value is {{everyMonthsMaxValue}}</ion-label>
-        </ion-chip>
-      </div>
+      <ion-chip
+        *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.required">
+        <ion-label color="danger">Every weeks required</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.min">
+        <ion-label color="danger">Every weeks min. value is {{everyWeeksMinValue}}</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="(form.controls['everyWeeks'].dirty || form.controls['everyWeeks'].touched) && form.controls['everyWeeks'].errors?.max">
+        <ion-label color="danger">Every weeks max. value is {{everyWeeksMaxValue}}</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.required">
+        <ion-label color="danger">Every months required</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.min">
+        <ion-label color="danger">Every months min. value is {{everyMonthsMinValue}}</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="(form.controls['everyMonths'].dirty || form.controls['everyMonths'].touched) && form.controls['everyMonths'].errors?.max">
+        <ion-label color="danger">Every months max. value is {{everyMonthsMaxValue}}</ion-label>
+      </ion-chip>
     </ion-row>
   </form>
 </ion-content>

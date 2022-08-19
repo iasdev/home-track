@@ -16,6 +16,10 @@ const routes: Routes = [
     loadChildren: () => import('./pages/tasks/task/task.module').then( m => m.TaskPageModule)
   },
   {
+    path: 'reminder',
+    loadChildren: () => import('./pages/tasks/task/task.module').then( m => m.TaskPageModule)
+  },
+  {
     path: 'pending',
     loadChildren: () => import('./pages/pending/pending.module').then( m => m.PendingPageModule)
   },

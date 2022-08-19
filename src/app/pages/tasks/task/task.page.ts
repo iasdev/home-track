@@ -15,29 +15,26 @@ export class TaskPage implements OnInit {
   protected now = new Date().toISOString()
   private defaultTaskRepeatTimes = 3
 
-  private repeatTimesMinValue = 3
-  private repeatTimesMaxValue = 20
-  private everyWeeksMinValue = 1
-  private everyWeeksMaxValue = 12 * 4
-  private everyMonthsMinValue = 1
-  private everyMonthsMaxValue = 12
+  protected repeatTimesMinValue = 3
+  protected repeatTimesMaxValue = 20
+  protected everyWeeksMinValue = 1
+  protected everyWeeksMaxValue = 12 * 4
+  protected everyMonthsMinValue = 1
+  protected everyMonthsMaxValue = 12
 
   private everyWeeksValidations = [Validators.required, Validators.min(this.everyWeeksMinValue), Validators.max(this.everyWeeksMaxValue)]
   private everyMonthsValidations = [Validators.required, Validators.min(this.everyMonthsMinValue), Validators.max(this.everyMonthsMaxValue)]
+  private repeatTimesValidations = [Validators.required, Validators.min(this.repeatTimesMinValue), Validators.max(this.repeatTimesMaxValue)]
 
   protected form = new FormGroup({
     id: new FormControl(),
     name: new FormControl(null, Validators.required),
     startDate: new FormControl(),
-    everyWeeks: new FormControl(null, this.isFastTask() ? null : this.everyWeeksValidations),
-    everyMonths: new FormControl(null, this.isFastTask() ? null : this.everyMonthsValidations),
-    repeatTimes: new FormControl(null, [
-      Validators.required, Validators.min(this.repeatTimesMinValue), Validators.max(this.repeatTimesMaxValue)
-    ]),
+    everyWeeks: new FormControl(null, !this.currentURL("fast-task") && !this.currentURL("reminder") ? this.everyWeeksValidations : null),
+    everyMonths: new FormControl(null, !this.currentURL("fast-task") && !this.currentURL("reminder") ? this.everyMonthsValidations : null),
+    repeatTimes: new FormControl(null, !this.currentURL("reminder") ? this.repeatTimesValidations : null),
     fastTask: new FormControl()
   })
-
-  task: any
 
   constructor(
     private router: Router,
@@ -60,16 +57,18 @@ export class TaskPage implements OnInit {
     })
   }
 
-  isFastTask() {
-    return (this.task && this.task.fastTask) || this.router.url.indexOf('fast-task') != -1
+  currentURL(urlPart: string) {
+    return this.router.url.indexOf(urlPart) != -1
   }
 
   getTitle() {
-    if (this.isFastTask()) {
+    if (this.currentURL("fast-task")) {
       return "New fast task"
+    } else if (this.currentURL("reminder")) {
+      return "New reminder"
+    } else {
+      return "New task"
     }
-
-    return this.task ? "Edit task" : "New task"
   }
 
   onEveryWeeksChange() {
@@ -91,17 +90,26 @@ export class TaskPage implements OnInit {
 
   save() {
     let taskData = this.form.value
-    taskData.fastTask = this.isFastTask()
+    
+    if (this.currentURL("reminder")) {
+      this.notif.scheduleMessageAtDates(taskData.name, [taskData.startDate]).then(() => {
+        this.helper.showInfoToast("Reminder ready!", "timer")
+        this.router.navigate(['pending'])
+      }).catch(() => {
+        this.helper.showInfoToast("Error creating reminder...")
+      })
+    } else {
+      taskData.fastTask = this.currentURL("fast-task")
+      this.storage.createTask(taskData)
+      this.resetFormAndSetDefaultValues()
 
-    this.storage.createTask(taskData)
-    this.resetFormAndSetDefaultValues()
-
-    this.notif.createTaskNotif(taskData).then(() => {
-      this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
-      this.router.navigate(['pending'])
-    }).catch(() => {
-      this.helper.showInfoToast("Error creating notifications...")
-    })
+      this.notif.createTaskNotif(taskData).then(() => {
+        this.helper.showInfoToast("Notifications ready!", "add-circle-outline")
+        this.router.navigate(['pending'])
+      }).catch(() => {
+        this.helper.showInfoToast("Error creating notifications...")
+      })
+    }
   }
 }
 

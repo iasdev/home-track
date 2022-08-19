@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ActionPerformed, LocalNotifications, LocalNotificationSchema, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { ActionPerformed, LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
 import { BehaviorSubject } from 'rxjs'
 import { IonicHelperService } from './ionic-helper.service'
 
@@ -18,17 +18,15 @@ export class LocalNotificationsWrapperService {
   private taskMinutes = 0
 
   constructor(protected helper: IonicHelperService) {
-    LocalNotifications.registerActionTypes({
-      types: [
-        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
-        {id: "testing", "actions": [{id: "test", title: "Test"}]}
-      ]
-    })
-
+    LocalNotifications.registerActionTypes({types: [{id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]}]})
     LocalNotifications.addListener("localNotificationActionPerformed", (action) => this.showOnEventDialog(action))
   }
 
   showOnEventDialog(action: ActionPerformed) {
+    if (!action.notification.extra) {
+      return // It's a reminder, stop processing
+    }
+
     if ("done" == action.actionId || action.notification.extra.isLastDate) {
       this.helper.showDialog("Are you sure?", `Did you complete the task '${action.notification.title}'?`).then((event) => {
         if (event.value) {
@@ -61,16 +59,15 @@ export class LocalNotificationsWrapperService {
   }
 
   scheduleMessageAtDates(msg: string, atDates: Date[]) {
-    let now = Date.now()
+    let now = new Date()
+    const id = parseInt(`${now.getDate()}${now.getMinutes()}${now.getSeconds()}${now.getMilliseconds()}`)
+
     let scheduleAt = atDates.map((atDate, index) => {
       return {
-        id: now + (index + 1),
-        title: `Title: ${msg}`,
-        body: `Msg: ${msg}`,
+        id: id + (index + 1),
+        title: msg,
+        body: msg,
         schedule: { at: atDate },
-        extra: { test: true },
-        actionTypeId: "task",
-        ongoing: (atDates.length - 1) == index,
         autoCancel: false
       }
     })
@@ -115,7 +112,7 @@ export class LocalNotificationsWrapperService {
   }
 
   createTaskNotif(task: any): Promise<ScheduleResult> {
-    let now = new Date();
+    let now = new Date()
     let startDate = typeof task.startDate == "string" ? new Date(task.startDate) : new Date(task.startDate.getTime())
     let notifDate = new Date(startDate.getTime())
     notifDate.setSeconds(now.getSeconds())

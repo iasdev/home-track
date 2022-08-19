@@ -26,30 +26,31 @@ export class PendingPage implements OnInit {
     this.pendingNotifications = this.filterFirstNotificationsAndSort(notifications)
   }
 
-  private filterFirstNotificationsAndSort(notifications: PendingLocalNotificationSchema[]) {
+  private filterFirstNotificationsAndSort(pending: PendingLocalNotificationSchema[]) {
     let result: PendingLocalNotificationSchema[] = []
 
-    notifications.forEach(n => {
+    pending.forEach(n => {
       let added = result.find(r => r.title == n.title)
 
       if (!added) {
-        let notifs = notifications.filter(n2 => n2.title == n.title)
-        let notif = notifs.sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())[0]
-        result.push(notif)
+        let notifications = pending.filter(n2 => n2.title == n.title)
+        let notification = notifications.sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())[0]
+        result.push(notification)
       }
     })
 
-    result.sort((n1, n2) => n1.extra.firstDate - n2.extra.firstDate)
+    result.sort((n1, n2) => n1.extra && n2.extra ? n1.extra.firstDate - n2.extra.firstDate : 0)
 
-    let fastTasks = result.filter(r => r.extra.fastTask)
-    let normalTasks = result.filter(r => !r.extra.fastTask)
+    let reminders = result.filter(r => !r.extra)
+    let fastTasks = result.filter(r => r.extra && r.extra.fastTask)
+    let normalTasks = result.filter(r => r.extra && !r.extra.fastTask)
 
-    return [...fastTasks, ...normalTasks]
+    return [...reminders, ...fastTasks, ...normalTasks]
   }
 
-  getCalendarDate(max: true) {
+  getCalendarDate(mode: string) {
     const allPendingNotifTimes = this.pendingNotifications.map(n => new Date(n.schedule.at).getTime())
-    return new Date(max ? Math.max(...allPendingNotifTimes) : Date.now()).toISOString()
+    return new Date(mode == 'max' ? Math.max(...allPendingNotifTimes) : Date.now()).toISOString()
   }
 
   onDateChange(event) {

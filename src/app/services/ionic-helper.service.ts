@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ToastController } from '@ionic/angular';
 import { Dialog } from '@capacitor/dialog';
+import { ToastController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root'

@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
     { title: 'Pending tasks', url: '/pending', icon: 'calendar' },
     { title: 'All tasks', url: '/tasks', icon: 'hammer' },
     { title: 'Fast task', url: '/fast-task', icon: 'alert-circle' },
+    { title: 'Reminder', url: '/reminder', icon: 'timer' },
   ]
   protected downMenuOptions = [
     { title: 'Settings', url: '/settings', icon: 'settings' }
