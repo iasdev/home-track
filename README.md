@@ -4,7 +4,7 @@ An Android app for home task tracking
 ## Features
 - Schedule normal tasks (they will repeat monthly / weekly many times)
 - Schedule "fast/priority" tasks (they will repeat in the next few days many times)
-- Re-schedule "fast/priority" tasks (if they are expired in time)
+- Re-schedule tasks (if they are expired in time)
 - Calendar panel to check next/pending tasks
 - Settings panel to backup/restore tasks data (and other tools)
 
