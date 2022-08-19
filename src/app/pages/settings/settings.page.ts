@@ -83,8 +83,8 @@ export class SettingsPage implements OnInit {
 
   dev() {
     const date = new Date()
-    const dates = Array(5).fill(0).map(x => new Date(date.setSeconds(date.getSeconds() + 5)))
-    this.notif.scheduleMessageAtDates(Math.random()*1000+"---", dates)
+    const dates = Array(2).fill(0).map(x => new Date(date.setSeconds(date.getSeconds() + 5)))
+    this.notif.scheduleMessageAtDates(Math.random()*1000+"", dates)
   }
 
 }

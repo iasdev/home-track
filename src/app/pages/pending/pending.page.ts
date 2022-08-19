@@ -49,7 +49,7 @@ export class PendingPage implements OnInit {
 
   getCalendarDate(max: true) {
     const allPendingNotifTimes = this.pendingNotifications.map(n => new Date(n.schedule.at).getTime())
-    return new Date(max ? Math.max(...allPendingNotifTimes) : Math.min(...allPendingNotifTimes)).toISOString()
+    return new Date(max ? Math.max(...allPendingNotifTimes) : Date.now()).toISOString()
   }
 
   onDateChange(event) {

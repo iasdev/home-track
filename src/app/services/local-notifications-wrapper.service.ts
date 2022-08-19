@@ -65,12 +65,12 @@ export class LocalNotificationsWrapperService {
     let scheduleAt = atDates.map((atDate, index) => {
       return {
         id: now + (index + 1),
-        title: `Title: ${msg} - ${now}`,
+        title: `Title: ${msg}`,
         body: `Msg: ${msg}`,
         schedule: { at: atDate },
         extra: { test: true },
-        actionTypeId: "testing",
-        ongoing: true,
+        actionTypeId: "task",
+        ongoing: (atDates.length - 1) == index,
         autoCancel: false
       }
     })

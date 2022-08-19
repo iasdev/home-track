@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core'
-import { Router } from '@angular/router'
 import { App } from '@capacitor/app'
 import { LocalNotificationSchema } from '@capacitor/local-notifications'
 import { IonicHelperService } from './services/ionic-helper.service'
@@ -28,7 +27,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     private storage: StorageWrapperService,
-    private router: Router,
     private notif: LocalNotificationsWrapperService,
     private helper: IonicHelperService
   ) {
@@ -58,11 +56,11 @@ export class AppComponent implements OnInit {
         if (task.fastTask) {
           this.storage.deleteTask(task.id)
           this.helper.showInfoToast("Task completed!", "checkmark-circle")
-          this.router.navigate(['tasks'])
+          window.location.reload()
         } else {
           this.notif.repeatTaskNotif(task).then(() => {
             this.helper.showInfoToast("Task completed and notifications ready again!", "checkmark-circle")
-            this.router.navigate(['pending'])
+            window.location.reload()
           }).catch(() => {
             this.helper.showErrorToast("Error while repeating task after completed...")
           })
