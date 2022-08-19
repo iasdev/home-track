@@ -7,7 +7,7 @@
 
 <ion-content>
   <ion-datetime *ngIf="pendingNotifications && pendingNotifications.length > 0" 
-    [firstDayOfWeek]="1" [min]="getCalendarDate('min')" [max]="getCalendarDate('max')" presentation="date" size="cover" (ionChange)="onDateChange($event)">
+    [firstDayOfWeek]="1" [min]="now" presentation="date" size="cover" (ionChange)="onDateChange($event)">
   </ion-datetime>
   <ion-list>
     <ion-note *ngIf="!pendingNotifications || pendingNotifications.length == 0" class="ion-margin-start ion-margin-top">No pending tasks found...</ion-note>

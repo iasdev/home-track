@@ -1,5 +1,5 @@
-import { Injectable, OnInit } from '@angular/core'
-import { Storage } from '@capacitor/storage'
+import { Injectable } from '@angular/core'
+import { Preferences } from '@capacitor/preferences'
 import { IonicHelperService } from './ionic-helper.service'
 
 @Injectable({
@@ -11,7 +11,7 @@ export class StorageWrapperService {
   constructor(private helper: IonicHelperService) {}
 
   prepareData() {
-    Storage.get({key: 'tasks'}).then((stored) => {
+    Preferences.get({key: 'tasks'}).then((stored) => {
       this.tasks = stored.value ? JSON.parse(stored.value) : []
     }).catch((err) => {
       this.tasks = []
@@ -21,7 +21,7 @@ export class StorageWrapperService {
   }
 
   private saveData() {
-    Storage.set({key: 'tasks', value: JSON.stringify(this.tasks)})
+    Preferences.set({key: 'tasks', value: JSON.stringify(this.tasks)})
   }
 
   getTasks() {

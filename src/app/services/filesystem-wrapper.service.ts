@@ -13,7 +13,7 @@ export class FilesystemWrapperService {
 
   async listFiles(): Promise<string[]> {
     let value = await Filesystem.readdir({path: this.baseAppPath, directory: this.readWriteDir})
-    return value.files
+    return value.files.map(f => f.name)
   }
 
   write(content: string, fileNameWithExtension: string): Promise<WriteFileResult> {

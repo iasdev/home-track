@@ -10,6 +10,7 @@ import { LocalNotificationsWrapperService } from 'src/app/services/local-notific
 })
 export class PendingPage implements OnInit {
 
+  protected now = new Date().toISOString();
   protected pendingNotifications: PendingLocalNotificationSchema[] = []
 
   constructor(
@@ -46,11 +47,6 @@ export class PendingPage implements OnInit {
     let normalTasks = result.filter(r => r.extra && !r.extra.fastTask)
 
     return [...reminders, ...fastTasks, ...normalTasks]
-  }
-
-  getCalendarDate(mode: string) {
-    const allPendingNotifTimes = this.pendingNotifications.map(n => new Date(n.schedule.at).getTime())
-    return new Date(mode == 'max' ? Math.max(...allPendingNotifTimes) : Date.now()).toISOString()
   }
 
   onDateChange(event) {
