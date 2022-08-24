@@ -1,4 +1,4 @@
-package org.iasdev;
+package org.iasdev.ht;
 
 import com.getcapacitor.BridgeActivity;
 
