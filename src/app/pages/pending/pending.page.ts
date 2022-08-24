@@ -49,6 +49,10 @@ export class PendingPage implements OnInit {
     return [...reminders, ...fastTasks, ...normalTasks]
   }
 
+  getPendingSummary(n) {
+    return !n.extra ? `${n.title}: ${new Date(n.schedule.at).toLocaleTimeString("es-ES")}` : `${n.title}: ${n.extra.dateRange}`
+  }
+
   onDateChange(event) {
     if (event && event.detail && event.detail.value) {
       let selectedDate = new Date(event.detail.value).toLocaleDateString("es-ES")

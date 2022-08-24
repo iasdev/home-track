@@ -13,7 +13,7 @@
     <ion-note *ngIf="!pendingNotifications || pendingNotifications.length == 0" class="ion-margin-start ion-margin-top">No pending tasks found...</ion-note>
     <ion-item *ngFor="let p of pendingNotifications"> 
       <ion-icon slot="start" class="toolbar-button" [name]="!p.extra ? 'timer' : (p.extra.fastTask ? 'alert-circle' : 'hammer')"></ion-icon>
-      <ion-label class="ion-text-wrap">{{ !p.extra ? p.title : (p.title + ": " + p.extra.dateRange) }}</ion-label>
+      <ion-label class="ion-text-wrap">{{ getPendingSummary(p) }}</ion-label>
     </ion-item>
   </ion-list>
 </ion-content>
