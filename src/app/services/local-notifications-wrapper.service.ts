@@ -159,6 +159,8 @@ export class LocalNotificationsWrapperService {
       notifDate.setDate(notifDate.getDate() + (everyWeeks * 7))
     }
 
+    notifDate.setDate(notifDate.getDate() - 1)
+
     let atDates = [notifDate]
     let repeatAtDates = Array(task.repeatTimes).fill(0).map(x => {
       notifDate = new Date(notifDate.getTime())
