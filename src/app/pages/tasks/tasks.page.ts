@@ -33,22 +33,28 @@ export class TasksPage implements OnInit {
 
   showTaskSummary(task) {
     const taskName = `The task '${task.name}'`
-    const repeatTimes = `will repeat ${task.repeatTimes} times`
-    const startDate = "with start date: " + new Date(task.startDate).toLocaleDateString("es-ES")
+
+    if (this.isExpired(task)) {
+      this.helper.showInfoToast(`${taskName} is expired...`, 'timer', 5000)
+      return
+    }
+
+    const repeatTimes = `repeats ${task.repeatTimes} times`
+    const startDate = "with start date " + new Date(task.startDate).toLocaleDateString("es-ES")
     
     let everyWeeks: string
     if (task.everyWeeks && task.everyWeeks > 0) {
-      everyWeeks = `will repeat ${task.repeatTimes} times every ${task.everyWeeks} weeks`
+      everyWeeks = `repeats ${task.repeatTimes} times every ${task.everyWeeks} weeks`
     }
 
     let everyMonths: string
     if (task.everyMonths && task.everyMonths > 0) {
-      everyMonths = `will repeat ${task.repeatTimes} times every ${task.everyMonths} months`
+      everyMonths = `repeats ${task.repeatTimes} times every ${task.everyMonths} months`
     }
 
     let everyWeeksAndMonths: string
     if (task.everyWeeks && task.everyWeeks > 0 && task.everyMonths && task.everyMonths > 0) {
-      everyWeeksAndMonths = `will repeat ${task.repeatTimes} times every ${task.everyWeeks} weeks and ${task.everyMonths} months`
+      everyWeeksAndMonths = `repeats ${task.repeatTimes} times every ${task.everyWeeks} weeks and ${task.everyMonths} months`
     }
 
     let taskIcon: string
