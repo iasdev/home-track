@@ -50,7 +50,8 @@ export class PendingPage implements OnInit {
   }
 
   getPendingSummary(n) {
-    return !n.extra ? `${n.title}: ${new Date(n.schedule.at).toLocaleTimeString("es-ES")}` : `${n.title}: ${n.extra.dateRange}`
+    let scheduleAt = new Date(n.schedule.at)
+    return !n.extra ? `${n.title}: ${scheduleAt.toLocaleDateString("es-ES")} ${scheduleAt.toLocaleTimeString("es-ES")}` : `${n.title}: ${n.extra.dateRange}`
   }
 
   onDateChange(event) {

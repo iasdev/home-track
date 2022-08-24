@@ -29,7 +29,8 @@ export class AdminNotificationsPage implements OnInit {
   }
 
   getNotificationSummary(n: PendingLocalNotificationSchema) {
-    return `${n.id} ${n.title}: ${n.extra ? new Date(n.schedule.at).toLocaleDateString("es-ES") : new Date(n.schedule.at).toLocaleTimeString("es-ES")}`
+    let scheduleAt = new Date(n.schedule.at)
+    return `${n.id} ${n.title}: ${scheduleAt.toLocaleDateString("es-ES")} ${scheduleAt.toLocaleTimeString("es-ES")}`
   }
 
   notify(seconds: number, exit: boolean) {

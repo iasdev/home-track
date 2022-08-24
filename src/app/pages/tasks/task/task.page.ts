@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, ViewChild } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { IonicHelperService } from 'src/app/services/ionic-helper.service'
@@ -26,6 +26,9 @@ export class TaskPage implements OnInit {
   private everyMonthsValidations = [Validators.required, Validators.min(this.everyMonthsMinValue), Validators.max(this.everyMonthsMaxValue)]
   private repeatTimesValidations = [Validators.required, Validators.min(this.repeatTimesMinValue), Validators.max(this.repeatTimesMaxValue)]
 
+  @ViewChild('datepicker') datePicker: any;
+  @ViewChild('timepicker') timePicker: any;
+
   protected form = new FormGroup({
     id: new FormControl(),
     name: new FormControl(null, Validators.required),
@@ -48,6 +51,9 @@ export class TaskPage implements OnInit {
   }
 
   resetFormAndSetDefaultValues() {
+    this.datePicker?.reset()
+    this.timePicker?.reset()
+
     this.form.reset()
     this.form.patchValue({
       name: '',
@@ -88,11 +94,23 @@ export class TaskPage implements OnInit {
     }
   }
 
+  onTimeChange(event) {
+    if (event && event.detail && event.detail.value) {
+      let selectedDate = new Date(event.detail.value)
+      let currentStartDate = this.form.controls.startDate.value as Date
+      currentStartDate.setHours(selectedDate.getHours())
+      currentStartDate.setMinutes(selectedDate.getMinutes())
+      currentStartDate.setSeconds(selectedDate.getSeconds())
+      this.form.patchValue({startDate: currentStartDate})
+    }
+  }
+
   save() {
     let taskData = this.form.value
     
     if (this.currentURL("reminder")) {
       this.notif.scheduleMessageAtDates(taskData.name, [taskData.startDate]).then(() => {
+        this.resetFormAndSetDefaultValues()
         this.helper.showInfoToast("Reminder ready!", "timer")
         this.router.navigate(['pending'])
       }).catch(() => {

@@ -10,18 +10,22 @@
 
 <ion-content>
   <form [formGroup]="form" (ngSubmit)="save()">
-    <ion-item *ngIf="!currentURL('reminder')">
-      <ion-datetime [firstDayOfWeek]="1" [min]="now" presentation="date" size="cover" (ionChange)="onStartDateChange($event)">
-      </ion-datetime>
-    </ion-item>
-    <ion-item *ngIf="currentURL('reminder')">
-      <ion-datetime #datetime [firstDayOfWeek]="1" [min]="now" presentation="date-time" size="cover" (ionChange)="onStartDateChange($event)">
-        <span slot="time-label"></span>
-        <ion-buttons slot="buttons">
-          <ion-button color="danger" (click)="datetime.reset()">Reset</ion-button>
-        </ion-buttons>
-      </ion-datetime>
-    </ion-item>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-datetime #datepicker [firstDayOfWeek]="1" [min]="now" presentation="date" size="cover" (ionChange)="onStartDateChange($event)">
+          </ion-datetime>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="currentURL('reminder')">
+      <ion-col>
+        <ion-item>
+          <ion-datetime #timepicker presentation="time" size="cover" (ionChange)="onTimeChange($event)">
+          </ion-datetime>
+        </ion-item>
+      </ion-col>
+    </ion-row>
     <ion-row>
       <ion-col>
         <ion-item>
