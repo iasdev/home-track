@@ -1,0 +1,39 @@
+name: SNAPSHOT
+
+on:
+  #push:
+    #branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        default: 'X.X.X-SNAPSHOT'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: script
+        run: |
+          sudo apt install android-sdk -y
+          npm run github-ci
+      - name: create release on github
+        id: step_create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: true
+      - name: upload release to github
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.step_create_release.outputs.upload_url }}
+          asset_path: ./build.apk
+          asset_name: home-track-${{ github.event.inputs.version }}.apk
+          asset_content_type: application/vnd.android.package-archive
