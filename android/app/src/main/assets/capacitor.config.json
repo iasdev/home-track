@@ -1,5 +1,5 @@
 {
-	"appId": "org.iasdev",
+	"appId": "org.iasdev.ht",
 	"appName": "Home Track",
 	"webDir": "www",
 	"bundledWebRuntime": false,
