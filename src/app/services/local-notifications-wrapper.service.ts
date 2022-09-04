@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core'
-import { ActionPerformed, LocalNotifications, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
+import { ActionPerformed, LocalNotifications, LocalNotificationSchema, PendingLocalNotificationSchema, ScheduleResult } from '@capacitor/local-notifications'
 import { BehaviorSubject } from 'rxjs'
 import { IonicHelperService } from './ionic-helper.service'
+import { StorageWrapperService } from './storage-wrapper.service'
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalNotificationsWrapperService {
 
-  private notificationDoneBS = new BehaviorSubject(null)
-  public onNotificationDone = this.notificationDoneBS.asObservable()
+  private notificationActionConfirmBS = new BehaviorSubject(null)
+  private notificationActionCancelBS = new BehaviorSubject(null)
+  public onNotificationActionConfirm = this.notificationActionConfirmBS.asObservable()
+  public onNotificationActionCancel = this.notificationActionCancelBS.asObservable()
 
   private todayFirstTaskHour = 22
   private todayFirstTaskMinutes = 0
@@ -17,23 +20,44 @@ export class LocalNotificationsWrapperService {
   private taskHour = 10
   private taskMinutes = 0
 
-  constructor(protected helper: IonicHelperService) {
-    LocalNotifications.registerActionTypes({types: [{id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]}]})
+  constructor(
+    protected helper: IonicHelperService,
+    protected storage: StorageWrapperService
+  ) {
+    LocalNotifications.registerActionTypes({
+      types: [
+        {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
+        {id: "reminder", "actions": [{id: "repeatTomorrow", title: "Repeat tomorrow"}, {id: "repeatLater", title: "Repeat later"}]}
+      ]
+    })
     LocalNotifications.addListener("localNotificationActionPerformed", (action) => this.showOnEventDialog(action))
   }
 
   showOnEventDialog(action: ActionPerformed) {
-    if (!action.notification.extra) {
-      return // It's a reminder, stop processing
+    let dialogTitle: string
+    let dialogMessage: string
+
+    if ("repeatTomorrow" == action.actionId) {
+      dialogTitle = "Repeat tomorrow?"
+      dialogMessage = `Do you want to repeat '${action.notification.title}' tomorrow?`
+    } else if ("repeatLater" == action.actionId) {
+      dialogTitle = "Repeat later?"
+      dialogMessage = `Do you want to repeat '${action.notification.title}' later?`
+    } else if ("done" == action.actionId) {
+      dialogTitle = "Task done"
+      dialogMessage = `Did you complete the task '${action.notification.title}'?`
+    } else if (action.notification.extra.isLastDate) {
+      dialogTitle = "Task expired"
+      dialogMessage = `The task expired, did you complete the task '${action.notification.title}'?`
     }
 
-    if ("done" == action.actionId || action.notification.extra.isLastDate) {
-      this.helper.showDialog("Are you sure?", `Did you complete the task '${action.notification.title}'?`).then((event) => {
-        if (event.value) {
-          this.notificationDoneBS.next(action.notification)
-        }
-      })
-    }
+    this.helper.showDialog(dialogTitle, dialogMessage).then((event) => {
+      if (event.value) {
+        this.notificationActionConfirmBS.next(action.notification)
+      } else {
+        this.notificationActionCancelBS.next(action.notification)
+      }
+    })
   }
 
   async getPending(): Promise<PendingLocalNotificationSchema[]> {
@@ -68,6 +92,7 @@ export class LocalNotificationsWrapperService {
         title: msg,
         body: msg,
         schedule: { at: atDate },
+        actionTypeId: "reminder",
         autoCancel: false
       }
     })
@@ -170,5 +195,71 @@ export class LocalNotificationsWrapperService {
     atDates.push(...repeatAtDates)
 
     return this.schedule(task, repeatAtDates)
+  }
+
+  public configureOnNotifActionConfirm() {
+    this.onNotificationActionConfirm.subscribe((notification: LocalNotificationSchema) => {
+      if (!notification) {
+        return
+      }
+
+      // reminders
+      if (!notification.extra) {
+        let originalScheduleAt = new Date(notification.schedule.at)
+
+        if (notification.actionTypeId == "repeatTomorrow") {
+          originalScheduleAt.setDate(originalScheduleAt.getDate() + 1)
+        } else if (notification.actionTypeId == "repeatLater") {
+          originalScheduleAt.setHours(originalScheduleAt.getHours() + 1)
+        }
+
+        this.scheduleMessageAtDates(notification.title, [originalScheduleAt])
+        return;
+      }
+
+      // tasks
+      this.deleteNotificationsByTitle(notification.title).then(() => {
+        let task = this.storage.getTaskByName(notification.title)
+
+        if (task.fastTask) {
+          this.storage.deleteTask(task.id)
+          this.helper.showInfoToast("Task completed!", "checkmark-circle")
+          window.location.reload()
+        } else {
+          this.repeatTaskNotif(task).then(() => {
+            this.helper.showInfoToast("Task completed and notifications ready again!", "checkmark-circle")
+            window.location.reload()
+          }).catch(() => {
+            this.helper.showErrorToast("Error while repeating task after completed...")
+          })
+        }
+      }).catch(() => {
+        this.helper.showErrorToast("Error while deleting notifications...")
+      })
+    })
+  }
+
+  public configureOnNotifActionCancel() {
+    this.onNotificationActionCancel.subscribe((notification: LocalNotificationSchema) => {
+      if (!notification) {
+        return
+      }
+
+      if (notification.extra && notification.extra.isLastDate) {
+        this.deleteNotificationsByTitle(notification.title).then(() => {
+          let task = this.storage.getTaskByName(notification.title)
+          task.startDate = new Date()
+  
+          this.repeatTaskNotif(task).then(() => {
+            this.helper.showInfoToast("Task expired but notifications ready again!", "checkmark-circle")
+            window.location.reload()
+          }).catch(() => {
+            this.helper.showErrorToast("Error while repeating task after completed...")
+          })
+        }).catch(() => {
+          this.helper.showErrorToast("Error while deleting notifications...")
+        })
+      }
+    })
   }
 }

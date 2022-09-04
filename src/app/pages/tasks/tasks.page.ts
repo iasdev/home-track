@@ -97,8 +97,29 @@ export class TasksPage implements OnInit {
     })
   }
 
-  showDeleteCompleteDialog(task) {
-    this.helper.showDialog("Are you sure?", task.fastTask ? "Did you complete the task?" : "Do you want to delete the task?").then((event) => {
+  showCompleteTaskDialog(task) {
+    this.helper.showDialog("Are you sure?", "Do you want to complete the task?").then((event) => {
+      if (event.value) {
+        if (task.fastTask) {
+          this.deleteTask(task)
+        } else {
+          this.notif.deleteNotificationsByTitle(task.name).then(() => {
+            this.notif.repeatTaskNotif(task).then(() => {
+              this.helper.showInfoToast("Task completed and notifications ready again!", "checkmark-circle")
+              this.router.navigate(['pending'])
+            }).catch(() => {
+              this.helper.showErrorToast("Error while repeating task after completed...")
+            })
+          }).catch(() => {
+            this.helper.showErrorToast("Error while deleting notifications...")
+          })
+        }
+      }
+    })
+  }
+
+  showDeleteTaskDialog(task) {
+    this.helper.showDialog("Are you sure?", "Do you want to delete the task?").then((event) => {
       if (event.value) {
         this.deleteTask(task)
       }
@@ -111,12 +132,6 @@ export class TasksPage implements OnInit {
     if (deleted) {
       let title = "Task deleted"
       let icon = "trash"
-      
-      if (task.fastTask) {
-        title = "Task completed"
-        icon = "checkmark-circle"
-      }
-
       this.refreshTasks()
       this.helper.showInfoToast(title, icon)
     } else {
