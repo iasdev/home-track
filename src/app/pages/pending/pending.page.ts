@@ -42,7 +42,7 @@ export class PendingPage implements OnInit {
 
     result.sort((n1, n2) => n1.extra && n2.extra ? n1.extra.firstDate - n2.extra.firstDate : 0)
 
-    let reminders = result.filter(r => !r.extra)
+    let reminders = result.filter(r => !r.extra).sort((n1, n2) => new Date(n1.schedule.at).getTime() - new Date(n2.schedule.at).getTime())
     let fastTasks = result.filter(r => r.extra && r.extra.fastTask)
     let normalTasks = result.filter(r => r.extra && !r.extra.fastTask)
 
