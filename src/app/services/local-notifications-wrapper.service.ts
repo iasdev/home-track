@@ -27,7 +27,7 @@ export class LocalNotificationsWrapperService {
     LocalNotifications.registerActionTypes({
       types: [
         {id: "task", "actions": [{id: "done", title: "Done"}, {id: "notDone", title: "Not done"}]},
-        {id: "reminder", "actions": [{id: "repeatTomorrow", title: "Repeat tomorrow"}, {id: "repeatLater", title: "Repeat later"}]}
+        {id: "reminder", "actions": [{id: "repeatTomorrow", title: "Repeat tomorrow"}]}
       ]
     })
     LocalNotifications.addListener("localNotificationActionPerformed", (action) => this.showOnEventDialog(action))
@@ -206,13 +206,7 @@ export class LocalNotificationsWrapperService {
       // reminders
       if (!notification.extra) {
         let originalScheduleAt = new Date(notification.schedule.at)
-
-        if (notification.actionTypeId == "repeatTomorrow") {
-          originalScheduleAt.setDate(originalScheduleAt.getDate() + 1)
-        } else if (notification.actionTypeId == "repeatLater") {
-          originalScheduleAt.setHours(originalScheduleAt.getHours() + 1)
-        }
-
+        originalScheduleAt.setDate(originalScheduleAt.getDate() + 1)
         this.scheduleMessageAtDates(notification.title, [originalScheduleAt])
         return;
       }
