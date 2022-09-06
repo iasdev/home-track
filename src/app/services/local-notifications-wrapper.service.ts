@@ -93,7 +93,7 @@ export class LocalNotificationsWrapperService {
         body: msg,
         schedule: { at: atDate },
         actionTypeId: "reminder",
-        autoCancel: false
+        autoCancel: true
       }
     })
 
@@ -129,7 +129,7 @@ export class LocalNotificationsWrapperService {
         },
         actionTypeId: "task",
         ongoing: isLastNotification,
-        autoCancel: false
+        autoCancel: true
       }
     })
 
