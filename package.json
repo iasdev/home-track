@@ -11,7 +11,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "resources": "capacitor-resources -p android",
-    "refresh-android": "npx ionic build && npx cap copy android && npx cap sync",
+    "refresh-android": "npx ionic build android --prod && npx cap copy android && npx cap sync",
     "copy-apk": "copy android\\app\\build\\outputs\\apk\\debug\\app-debug.apk _%npm_package_name%-%npm_package_version%.apk",
     "build-android-debug": "npm run refresh-android && cd android && gradlew assembleDebug && npm run copy-apk",
     "github-ci": "npm install && npm run refresh-android && cd android && chmod 777 gradlew && ./gradlew assembleDebug && cd .. && cp android/app/build/outputs/apk/debug/app-debug.apk build.apk"
