@@ -208,6 +208,7 @@ export class LocalNotificationsWrapperService {
         let originalScheduleAt = new Date(notification.schedule.at)
         originalScheduleAt.setDate(originalScheduleAt.getDate() + 1)
         this.scheduleMessageAtDates(notification.title, [originalScheduleAt])
+        window.location.reload()
         return;
       }
 
