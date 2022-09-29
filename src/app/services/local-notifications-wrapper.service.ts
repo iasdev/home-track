@@ -221,6 +221,7 @@ export class LocalNotificationsWrapperService {
           this.helper.showInfoToast("Task completed!", "checkmark-circle")
           window.location.reload()
         } else {
+          task.startDate = new Date()
           this.repeatTaskNotif(task).then(() => {
             this.helper.showInfoToast("Task completed and notifications ready again!", "checkmark-circle")
             window.location.reload()
