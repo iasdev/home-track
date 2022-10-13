@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { PendingLocalNotificationSchema } from '@capacitor/local-notifications';
 import { IonicHelperService } from 'src/app/services/ionic-helper.service';
 import { LocalNotificationsWrapperService } from 'src/app/services/local-notifications-wrapper.service';
@@ -17,7 +16,6 @@ export class TasksPage implements OnInit {
 
   constructor(
     private storage: StorageWrapperService,
-    private router: Router,
     private notif: LocalNotificationsWrapperService,
     private helper: IonicHelperService
   ) { }
@@ -88,8 +86,8 @@ export class TasksPage implements OnInit {
         task.startDate = new Date()
 
         this.notif.repeatTaskNotif(task).then(() => {
+          this.refreshTasks()
           this.helper.showInfoToast("Notifications ready again!", "add-circle-outline")
-          this.router.navigate(['pending'])
         }).catch(() => {
           this.helper.showInfoToast("Error creating notifications...")
         })
@@ -105,8 +103,8 @@ export class TasksPage implements OnInit {
         } else {
           this.notif.deleteNotificationsByTitle(task.name).then(() => {
             this.notif.repeatTaskNotif(task).then(() => {
+              this.refreshTasks()
               this.helper.showInfoToast("Task completed and notifications ready again!", "checkmark-circle")
-              this.router.navigate(['pending'])
             }).catch(() => {
               this.helper.showErrorToast("Error while repeating task after completed...")
             })
